@@ -2,6 +2,7 @@ package com.emuneee.mascots;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
             holder.name.setText(mascot.getName());
             holder.college.setText(MascotUtil.getFullCollegeName(mascot));
             holder.phrase = mascot.getPhrase();
+            holder.whoAmI = String.format("I AM %s", mascot.getName().toUpperCase());
 
             for (int i = 0; i < mascot.getClass().getAnnotations().length; i++) {
                 Annotation annotation = mascot.getClass().getAnnotations()[i];
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         TextView seenAt;
         ImageView image;
         String phrase;
+        String whoAmI;
 
         public MascotHolder(View itemView) {
             super(itemView);
@@ -106,10 +109,33 @@ public class MainActivity extends AppCompatActivity {
             image = (ImageView) itemView.findViewById(R.id.image);
             seenAt = (TextView) itemView.findViewById(R.id.seen_at);
 
-            itemView.setOnClickListener(    new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Toast.makeText(view.getContext(), phrase, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(final View view) {
+
+                    new AsyncTask<Void, Void, String>() {
+
+                        @Override
+                        protected String doInBackground(Void... params) {
+                            // PRETEND THIS IS A BLOCKING HTTP API CALL
+                            // :-)
+                            return whoAmI;
+                        }
+
+                        @Override
+                        protected void onPostExecute(String s) {
+                            Toast.makeText(view.getContext(), s, Toast.LENGTH_SHORT).show();
+                        }
+                    }.execute();
+
+                    return true;
                 }
             });
         }
