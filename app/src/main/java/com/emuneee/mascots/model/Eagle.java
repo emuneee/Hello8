@@ -6,12 +6,9 @@ import com.emuneee.mascots.SeenAtPlaces;
 /**
  * Created by WillowTree, Inc on 5/11/16.
  */
-@SeenAtPlaces({
-        @SeenAtPlace(name = "Basketball"),
-        @SeenAtPlace(name = "Football"),
-        @SeenAtPlace(name = "Baseball")
-})
-public class Eagle implements Mascot {
+@SeenAtPlace(name = "Basketball")
+@SeenAtPlace(name = "Football")
+public class Eagle implements Mascot, NonPointingPerson {
 
     @Override
     public String getName() {
@@ -41,5 +38,10 @@ public class Eagle implements Mascot {
     @Override
     public String getMascotImageUrl() {
         return "https://c2.staticflickr.com/6/5477/10235085714_fa5e5a8817_b.jpg";
+    }
+
+    @Override
+    public boolean isPointing() {
+        return NonPointingPerson.super.isPointing();
     }
 }

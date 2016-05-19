@@ -11,4 +11,12 @@ public interface Mascot {
     String getPhrase();
     boolean isAnimal();
     String getMascotImageUrl();
+
+    default boolean isPointing() {
+        return true;
+    }
+
+    static String getSomeData() {
+        return "some data";
+    }
 }

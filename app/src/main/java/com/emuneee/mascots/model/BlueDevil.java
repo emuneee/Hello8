@@ -6,11 +6,9 @@ import com.emuneee.mascots.SeenAtPlaces;
 /**
  * Created by WillowTree, Inc on 5/11/16.
  */
-@SeenAtPlaces({
-        @SeenAtPlace(name = "Basketball"),
-        @SeenAtPlace(name = "Football"),
-        @SeenAtPlace(name = "Baseball")
-})
+@SeenAtPlace(name = "Basketball")
+@SeenAtPlace(name = "Football")
+@SeenAtPlace(name = "Baseball")
 public class BlueDevil implements Mascot {
 
     @Override

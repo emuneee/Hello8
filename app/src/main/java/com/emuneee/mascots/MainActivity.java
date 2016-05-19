@@ -22,12 +22,14 @@ import com.emuneee.mascots.model.MascotUtil;
 import com.emuneee.mascots.model.MrWuf;
 import com.emuneee.mascots.model.Rameses;
 
+import junit.framework.Test;
+
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity {
 
     static final List<Mascot> MASCOTS = Arrays.asList(new MrWuf(), new Rameses(),
@@ -39,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mascotsRecycler = (RecyclerView) findViewById(R.id.mascots);
-        MascotsAdapter adapter = new MascotsAdapter(this, MASCOTS);
+        MascotsAdapter adapter = new MascotsAdapter(this,
+                MASCOTS.stream()
+                .filter(Mascot::isPointing)
+                .collect(Collectors.toList()));
         mascotsRecycler.setLayoutManager(new LinearLayoutManager(this));
         mascotsRecycler.setAdapter(adapter);
         getSupportActionBar().setTitle(String.format("%d Mascots", adapter.getItemCount()));
@@ -68,19 +73,13 @@ public class MainActivity extends AppCompatActivity {
             holder.phrase = mascot.getPhrase();
             holder.whoAmI = String.format("I AM %s", mascot.getName().toUpperCase());
 
-            for (int i = 0; i < mascot.getClass().getAnnotations().length; i++) {
-                Annotation annotation = mascot.getClass().getAnnotations()[i];
+            SeenAtPlace[] seenAtPlaces = mascot.getClass().getAnnotationsByType(SeenAtPlace.class);
+            StringBuilder seenAtStr = new StringBuilder();
 
-                if (annotation.annotationType() == SeenAtPlaces.class) {
-                    SeenAtPlaces seenAtPlaces = (SeenAtPlaces) annotation;
-                    StringBuilder seenAtStr = new StringBuilder();
-
-                    for (int j = 0; j < seenAtPlaces.value().length; j++) {
-                        seenAtStr.append(seenAtPlaces.value()[j].name()).append(" ");
-                    }
-                    holder.seenAt.setText(seenAtStr.toString());
-                }
+            for (int i = 0; i < seenAtPlaces.length; i++) {
+                seenAtStr.append(seenAtPlaces[i].name()).append(" ");
             }
+            holder.seenAt.setText(seenAtStr.toString());
             Glide.with(contextRef.get())
                     .fromUri()
                     .load(Uri.parse(mascot.getMascotImageUrl()))
@@ -101,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         ImageView image;
         String phrase;
         String whoAmI;
+        TestLambda testLambda;
 
         public MascotHolder(View itemView) {
             super(itemView);
@@ -109,35 +109,39 @@ public class MainActivity extends AppCompatActivity {
             image = (ImageView) itemView.findViewById(R.id.image);
             seenAt = (TextView) itemView.findViewById(R.id.seen_at);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), phrase, Toast.LENGTH_SHORT).show();
-                }
+            itemView.setOnClickListener(this::showToast);
+
+            itemView.setOnLongClickListener(view -> {
+
+                new AsyncTask<Void, Void, String>() {
+
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        // PRETEND THIS IS A BLOCKING HTTP API CALL
+                        // :-)
+                        return whoAmI;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        Toast.makeText(view.getContext(), s, Toast.LENGTH_SHORT).show();
+                    }
+                }.execute();
+
+                return true;
             });
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(final View view) {
+            testLambda = (i, j) -> {
 
-                    new AsyncTask<Void, Void, String>() {
+            };
+        }
 
-                        @Override
-                        protected String doInBackground(Void... params) {
-                            // PRETEND THIS IS A BLOCKING HTTP API CALL
-                            // :-)
-                            return whoAmI;
-                        }
+        private void showToast(View view) {
+            Toast.makeText(view.getContext(), phrase, Toast.LENGTH_SHORT).show();
+        }
 
-                        @Override
-                        protected void onPostExecute(String s) {
-                            Toast.makeText(view.getContext(), s, Toast.LENGTH_SHORT).show();
-                        }
-                    }.execute();
-
-                    return true;
-                }
-            });
+        private interface TestLambda {
+            void helloWorld(int i, int j);
         }
     }
 }
